@@ -3,7 +3,14 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
 # Load semantic model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        _model = SentenceTransformer('all-MiniLM-L3-v2')
+    return _model
+
 
 # Define helper functions
 def extract_years_of_experience(text):
@@ -22,8 +29,10 @@ def extract_skills(text):
 
 def match_job_to_candidates(job_description, resumes, top_k=5):
     # Encode job description and resumes for semantic similarity
+    model = get_model()
     job_embedding = model.encode(job_description, convert_to_tensor=True)
     resume_embeddings = model.encode(resumes, convert_to_tensor=True)
+
 
     # Compute semantic similarity scores
     similarity_scores = util.pytorch_cos_sim(job_embedding, resume_embeddings)[0].cpu().numpy()
